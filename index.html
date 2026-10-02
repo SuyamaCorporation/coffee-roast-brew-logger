@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Roast & Brew Logger</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-amber-50 min-h-screen">
+<div class="max-w-4xl mx-auto p-4">
+  <h1 class="text-3xl font-bold text-amber-900 mb-6 flex items-center gap-2">
+    ☕ Coffee Roast &amp; Brew Logger
+  </h1>
+
+  <!-- Add Form -->
+  <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+    <h2 class="text-xl font-semibold text-amber-800 mb-4">新しいコーヒーを追加</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">銘柄名 *</label>
+        <input id="name" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="例: Ethiopia Yirgacheffe">
+      </div>
+      <div>
+        <label for="origin" class="block text-sm font-medium text-gray-700 mb-1">産地 *</label>
+        <input id="origin" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="例: Ethiopia">
+      </div>
+      <div>
+        <label for="roastDate" class="block text-sm font-medium text-gray-700 mb-1">焙煎日</label>
+        <input id="roastDate" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400">
+      </div>
+      <div>
+        <label for="grind" class="block text-sm font-medium text-gray-700 mb-1">挽き目</label>
+        <select id="grind" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400">
+          <option value="Coarse">Coarse（粗挽き）</option>
+          <option value="Medium" selected>Medium（中挽き）</option>
+          <option value="Fine">Fine（細挽き）</option>
+        </select>
+      </div>
+      <div>
+        <label for="brewMethod" class="block text-sm font-medium text-gray-700 mb-1">抽出方法</label>
+        <select id="brewMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400">
+          <option value="Drip">Drip（ドリップ）</option>
+          <option value="Espresso">Espresso（エスプレッソ）</option>
+          <option value="French Press">French Press（フレンチプレス）</option>
+          <option value="AeroPress">AeroPress（エアロプレス）</option>
+          <option value="Pour Over">Pour Over（ハンドドリップ）</option>
+        </select>
+      </div>
+      <div>
+        <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">評価 (1-5)</label>
+        <select id="rating" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400">
+          <option value="1">★☆☆☆☆ (1)</option>
+          <option value="2">★★☆☆☆ (2)</option>
+          <option value="3" selected>★★★☆☆ (3)</option>
+          <option value="4">★★★★☆ (4)</option>
+          <option value="5">★★★★★ (5)</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">テイストノート</label>
+        <input id="notes" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="例: フルーティー、ベリー、明るい酸味">
+      </div>
+    </div>
+    <button onclick="addEntry()" class="mt-4 bg-amber-700 hover:bg-amber-800 text-white font-semibold px-6 py-2 rounded-lg transition" aria-label="コーヒーを追加">
+      追加する
+    </button>
+  </div>
+
+  <!-- Filter -->
+  <div class="flex flex-wrap gap-2 mb-4 items-center">
+    <span class="text-sm font-medium text-gray-600">フィルタ:</span>
+    <button onclick="setFilter('all')" id="filter-all" class="filter-btn bg-amber-700 text-white px-3 py-1 rounded-full text-sm" aria-label="すべて表示">すべて</button>
+    <button onclick="setFilter('Drip')" id="filter-Drip" class="filter-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" aria-label="Dripでフィルタ">Drip</button>
+    <button onclick="setFilter('Espresso')" id="filter-Espresso" class="filter-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" aria-label="Espressoでフィルタ">Espresso</button>
+    <button onclick="setFilter('French Press')" id="filter-French Press" class="filter-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" aria-label="French Pressでフィルタ">French Press</button>
+    <button onclick="setFilter('AeroPress')" id="filter-AeroPress" class="filter-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" aria-label="AeroPressでフィルタ">AeroPress</button>
+    <button onclick="setFilter('Pour Over')" id="filter-Pour Over" class="filter-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" aria-label="Pour Overでフィルタ">Pour Over</button>
+  </div>
+
+  <!-- Entries -->
+  <div id="entries" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  <p id="empty-msg" class="text-center text-gray-400 py-12 hidden">まだエントリがありません。最初のコーヒーを追加しましょう！</p>
+</div>
+
+<script>
+let currentFilter = 'all';
+
+function getEntries() {
+  try { return JSON.parse(localStorage.getItem('coffeeEntries') || '[]'); } catch(e) { return []; }
+}
+
+function saveEntries(entries) {
+  localStorage.setItem('coffeeEntries', JSON.stringify(entries));
+}
+
+function addEntry() {
+  const name = document.getElementById('name').value.trim();
+  const origin = document.getElementById('origin').value.trim();
+  if (!name || !origin) {
+    alert('銘柄名と産地は必須です');
+    return;
+  }
+  const entry = {
+    id: Date.now(),
+    name,
+    origin,
+    roastDate: document.getElementById('roastDate').value,
+    grind: document.getElementById('grind').value,
+    brewMethod: document.getElementById('brewMethod').value,
+    notes: document.getElementById('notes').value.trim(),
+    rating: parseInt(document.getElementById('rating').value),
+    createdAt: new Date().toISOString()
+  };
+  const entries = getEntries();
+  entries.unshift(entry);
+  saveEntries(entries);
+  document.getElementById('name').value = '';
+  document.getElementById('origin').value = '';
+  document.getElementById('notes').value = '';
+  renderEntries();
+}
+
+function deleteEntry(id) {
+  const entries = getEntries().filter(e => e.id !== id);
+  saveEntries(entries);
+  renderEntries();
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('bg-amber-700', 'text-white');
+    btn.classList.add('bg-gray-200', 'text-gray-700');
+  });
+  const active = document.getElementById('filter-' + f);
+  if (active) {
+    active.classList.remove('bg-gray-200', 'text-gray-700');
+    active.classList.add('bg-amber-700', 'text-white');
+  }
+  renderEntries();
+}
+
+function renderStars(rating) {
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+function renderEntries() {
+  const all = getEntries();
+  const filtered = currentFilter === 'all' ? all : all.filter(e => e.brewMethod === currentFilter);
+  const container = document.getElementById('entries');
+  const emptyMsg = document.getElementById('empty-msg');
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    emptyMsg.classList.remove('hidden');
+    return;
+  }
+  emptyMsg.classList.add('hidden');
+
+  filtered.forEach(entry => {
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-2xl shadow-md p-5 relative';
+
+    const title = document.createElement('h3');
+    title.className = 'text-lg font-bold text-amber-900 mb-1';
+    title.textContent = entry.name;
+    card.appendChild(title);
+
+    const meta = document.createElement('p');
+    meta.className = 'text-sm text-gray-500 mb-2';
+    meta.textContent = entry.origin + (entry.roastDate ? ' · 焙煎: ' + entry.roastDate : '');
+    card.appendChild(meta);
+
+    const tags = document.createElement('div');
+    tags.className = 'flex flex-wrap gap-2 mb-3';
+    [entry.grind, entry.brewMethod].forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full';
+      span.textContent = tag;
+      tags.appendChild(span);
+    });
+    card.appendChild(tags);
+
+    const stars = document.createElement('p');
+    stars.className = 'text-yellow-500 text-lg mb-2';
+    stars.textContent = renderStars(entry.rating);
+    card.appendChild(stars);
+
+    if (entry.notes) {
+      const notes = document.createElement('p');
+      notes.className = 'text-sm text-gray-600 italic';
+      notes.textContent = '"' + entry.notes + '"';
+      card.appendChild(notes);
+    }
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'absolute top-4 right-4 text-gray-300 hover:text-red-400 text-lg transition';
+    delBtn.textContent = '×';
+    delBtn.setAttribute('aria-label', entry.name + 'を削除');
+    delBtn.onclick = () => deleteEntry(entry.id);
+    card.appendChild(delBtn);
+
+    container.appendChild(card);
+  });
+}
+
+renderEntries();
+</script>
+</body>
+</html>
